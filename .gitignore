@@ -1,3 +1,12 @@
 .env
+.env.local
 .venv
+venv/
 .vscode
+__pycache__/
+*.pyc
+
+# Node / Vite
+node_modules/
+dist/
+.vercel
