@@ -1,3 +1,7 @@
+// Production Base API URL:
+// Reads VITE_API_URL or VITE_BACKEND_URL from environment; defaults to relative "" for same-domain proxy
+const API_BASE = (import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || '').replace(/\/$/, '');
+
 // State management
 let state = {
   messages: [],
@@ -32,41 +36,65 @@ thresholdSlider.addEventListener('input', (e) => {
   thresholdVal.textContent = parseFloat(e.target.value).toFixed(2);
 });
 
-// Check API Health
+// Phase 3: Reliable Health Check Implementation
 async function checkHealth() {
   statusBadge.className = 'badge badge-checking';
   statusText.textContent = 'Checking API...';
 
+  let lastError = null;
+
+  // 1. Primary: Try /health
   try {
-    const res = await fetch('/api/health');
+    const res = await fetch(`${API_BASE}/health`, { method: 'GET' });
     if (res.ok) {
       const data = await res.json();
-      state.apiConnected = true;
-      statusBadge.className = 'badge badge-connected';
-      statusText.textContent = `${data.llm_provider || 'Connected'}`;
-      return;
+      if (data.status === 'online' || data.status === 'healthy') {
+        state.apiConnected = true;
+        statusBadge.className = 'badge badge-connected';
+        statusText.textContent = `Connected (${data.service || 'Online'})`;
+        return;
+      }
     }
+    lastError = `HTTP ${res.status}`;
   } catch (err) {
-    console.warn('API health check error:', err);
+    lastError = err.message || 'Network unreachable';
   }
 
-  // Fallback to /api/v1/health
+  // 2. Fallback: Try /api/health
   try {
-    const res2 = await fetch('/api/v1/health');
+    const res2 = await fetch(`${API_BASE}/api/health`, { method: 'GET' });
     if (res2.ok) {
       const data2 = await res2.json();
+      if (data2.status === 'online' || data2.status === 'healthy') {
+        state.apiConnected = true;
+        statusBadge.className = 'badge badge-connected';
+        statusText.textContent = `Connected (${data2.service || 'Online'})`;
+        return;
+      }
+    }
+    lastError = `HTTP ${res2.status}`;
+  } catch (e) {
+    lastError = e.message || lastError;
+  }
+
+  // 3. Fallback: Try /version
+  try {
+    const res3 = await fetch(`${API_BASE}/version`, { method: 'GET' });
+    if (res3.ok) {
+      const data3 = await res3.json();
       state.apiConnected = true;
       statusBadge.className = 'badge badge-connected';
-      statusText.textContent = `${data2.llm_provider || 'Connected'}`;
+      statusText.textContent = `Connected (${data3.service || 'v1.0.0'})`;
       return;
     }
   } catch (e) {
-    console.warn('v1 health error:', e);
+    // Keep last error
   }
 
+  // If unreachable, report Disconnected with meaningful error
   state.apiConnected = false;
   statusBadge.className = 'badge badge-disconnected';
-  statusText.textContent = 'Disconnected';
+  statusText.textContent = `Disconnected (${lastError})`;
 }
 
 retryBtn.addEventListener('click', checkHealth);
@@ -86,7 +114,6 @@ function updateStats() {
 // Append a message bubble to chat
 function appendMessage(role, text, sources = [], matchesCount = 0) {
   if (welcomeCard && welcomeCard.parentElement) {
-    // Hide welcome card after first message
     welcomeCard.style.display = 'none';
   }
 
@@ -112,7 +139,7 @@ function appendMessage(role, text, sources = [], matchesCount = 0) {
   if (sources && sources.length > 0) {
     const sourcesBox = document.createElement('div');
     sourcesBox.className = 'sources-box';
-    sourcesBox.innerHTML = `<strong>📑 Sources (${matchesCount} matches):</strong><br/>` +
+    sourcesBox.innerHTML = `<strong>📑 Sources (${matchesCount} document matches):</strong><br/>` +
       sources.map((s) => `<span>📄 ${escapeHtml(s)}</span>`).join('');
     bubble.appendChild(sourcesBox);
   }
@@ -169,7 +196,7 @@ async function handleSend(queryText) {
   showTypingIndicator();
 
   try {
-    const response = await fetch('/api/ask', {
+    let response = await fetch(`${API_BASE}/api/ask`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -179,6 +206,20 @@ async function handleSend(queryText) {
         fallback_to_llm: fallbackCheckbox.checked,
       }),
     });
+
+    if (!response.ok && response.status === 404) {
+      // Fallback route /ask
+      response = await fetch(`${API_BASE}/ask`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: query,
+          top_k: parseInt(topKSlider.value, 10),
+          score_threshold: parseFloat(thresholdSlider.value),
+          fallback_to_llm: fallbackCheckbox.checked,
+        }),
+      });
+    }
 
     removeTypingIndicator();
 
@@ -203,7 +244,7 @@ async function handleSend(queryText) {
     console.error('Query error:', err);
     appendMessage(
       'assistant',
-      '⚠️ Connection Error: Unable to reach the backend API. Please make sure the service is running and properly configured.'
+      `⚠️ Connection Error: Unable to reach the backend API at '${API_BASE || window.location.origin}'. Please verify the backend service is deployed and running.`
     );
   } finally {
     sendBtn.disabled = false;
