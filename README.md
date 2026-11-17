@@ -1,161 +1,226 @@
-# 🤖 HR Policies RAG Chatbot
+# 🤖 HR Policies RAG Chatbot — AI-Powered Document Q&A
 
-This repository contains a **Retrieval-Augmented Generation (RAG) chatbot** designed to answer questions from HR policy documents using advanced AI technologies.
+A modern, production-grade **Retrieval-Augmented Generation (RAG)** assistant designed for corporate HR policy intelligence and automated document question answering. Built with **FastAPI**, **Vite**, **Pinecone Vector Database**, **Ollama LLaMA 3.1**, and **Groq Cloud Inference**.
 
-**Tech Stack:**
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-hr--policies--rag--chatbot--ai--powered.vercel.app-10b981?style=for-the-badge&logo=vercel)](https://hr-policies-rag-chatbot-ai-powered.vercel.app/)
+[![Deployment](https://img.shields.io/badge/Vercel-Deployment%20Dashboard-0070F3?style=for-the-badge&logo=vercel)](https://vercel.com/shah-abdul-mazids-projects/hr-policies-rag-chatbot-ai-powered-document-q-a/46CbuPqQqFXLsMggmBwkv7RGNXNV)
+[![Portfolio Case Study](https://img.shields.io/badge/Author%20Case%20Study-shahabdulmazidezan.me-6366f1?style=for-the-badge&logo=safari)](https://www.shahabdulmazidezan.me/)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/Shah-Abdul-Mazid/HR-Policies-RAG-Chatbot-AI-Powered-Document-Q-A)
 
-- **Vector Store:** Pinecone (serverless)  
-- **Embeddings:** `all-MiniLM-L6-v2`  
-- **LLM / Inference:** Groq LLaMA 3.1 / OpenAI / Ollama  
-- **Backend:** FastAPI (Python Serverless on Vercel)  
-- **Frontend:** Vite + Modern Web Chat UI (Vercel-native, No Streamlit)  
-
----
-
-## 🛠 Setup
-
-### 1. Clone the Repository
-```bash
-git clone https://github.com/Shah-Abdul-Mazid/DevelopRag.git
-cd DevelopRag
-```
-
-### 2. Repository Structure
-
-```
-DevelopRag/
-├── backend/
-│   ├── main.py             # FastAPI backend (dual routes /ask & /api/ask)
-│   ├── backend.py          # Core RAG implementation
-│   ├── rag_retriever_setup.py # Document indexing script
-│   ├── requirements.txt    # Backend dependencies (serverless-friendly)
-│   └── api/
-│       └── index.py        # Serverless function entrypoint
-├── frontend/               # Vite Web Chat UI (deployed to Vercel)
-│   ├── index.html          # Chat interface with parameters & stats
-│   ├── package.json        # Vite configuration
-│   └── src/
-│       ├── main.js         # API integration
-│       └── style.css       # Responsive styling
-├── HR Policies/            # PDF documents
-├── vercel.json             # Vercel multi-service configuration
-└── README.md
-```
-
-### 3. Install Dependencies
-
-```bash
-# Backend
-pip install -r backend/requirements.txt
-
-# Frontend
-cd frontend && npm install && cd ..
-```
-
-### 4. Set Environment Variables
-
-Create a `.env` in the `backend/` folder:
-
-```
-PINECONE_API_KEY=YOUR_PINECONE_API_KEY
-GROQ_API_KEY=YOUR_GROQ_API_KEY
-```
-
-### 5. Run Locally
-
-```bash
-# Terminal 1: Backend
-cd backend && python -m uvicorn main:app --reload
-
-# Terminal 2: Frontend
-cd frontend && npm run dev
-```
-
-The Streamlit app will open in your browser and connect to the backend.
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688?style=flat-square&logo=fastapi&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-5.0+-646CFF?style=flat-square&logo=vite&logoColor=white)
+![Pinecone](https://img.shields.io/badge/Pinecone-Serverless%20Vector%20DB-000000?style=flat-square&logo=pinecone&logoColor=white)
+![LLaMA 3.1](https://img.shields.io/badge/LLaMA_3.1-Meta%20AI-0467DF?style=flat-square&logo=meta&logoColor=white)
+![Groq](https://img.shields.io/badge/Groq-Cloud%20LPU-F55036?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)
 
 ---
 
-## 📚 Usage
-
-* Ask questions about HR policies directly in the chat interface.
-* Adjust RAG parameters in the sidebar:
-
-  * **Number of documents (top_k)** – how many relevant documents to retrieve
-  * **Similarity threshold** – minimum similarity score for retrieved documents
-  * **LLM fallback** – enable/disable fallback to general LLM if no documents are found
-* Chat history is preserved throughout the session.
+![HR Policies Assistant UI Showcase](./Homepage.png)
 
 ---
 
-## 🖼 Example Usage
+## 🌟 Key Highlights
 
-### 1. Chat Interface
-
-![Chat Interface Screenshot](frontend_screenshot_placeholder.png)
-*Web chat interface for interacting with the RAG chatbot.*
-
-### 2. Sample Queries
-
-| User Query                                                                                  | Example Response                                                                                                           |
-| ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| "When Red Cross Society in East Pakistan was transformed into the National Red Cross Society of Bangladesh?" | "The Red Cross Society in East Pakistan was transformed into the National Red Cross Society of Bangladesh on December 20, 1971." |
-| "When Renamed as Bangladesh Red Cross Society by a GoB order?"                               | "The Bangladesh Red Crescent Society was renamed as Bangladesh Red Cross Society by a GoB (Government of Bangladesh) order on January 4, 1972." |
-| "When Udayankur Seba Sangstha started its journey?"                                         | "Udayankur Seba Sangstha (USS) started its journey in 1997."                                                              |
-
-### 3. Adjustable Parameters
-
-* **Top K documents:** Retrieve more or fewer documents for context
-* **Similarity threshold:** Filter documents based on relevance
-* **LLM fallback:** Enable if no exact match is found in documents
+- 📚 **Grounded Document Verification (Zero Hallucinations):** Strict policy-bound retrieval guarantees responses are extracted directly from verified enterprise HR manuals (`HRMD Procedures`, `Human Resources Policy & Manual`, `USS HRD Policy`).
+- ⚡ **Hybrid Dual-Engine Inference:** Supports local GPU execution via **Ollama (LLaMA 3.1 8B)** with tunnel bridging as well as ultra-low latency **Groq Cloud LPU** inference for serverless environments.
+- 🎯 **Semantic Vector Search:** High-dimensional dense embeddings (`all-MiniLM-L6-v2`) indexed in **Pinecone Serverless** for sub-second similarity matching.
+- 🎛️ **Live Parameter Tuning:** Interactive sidebar controls allow users to adjust top-$k$ document chunk retrieval, similarity thresholds, and fallback flags in real time.
+- 🚀 **Vercel Multi-Service Micro-Architecture:** Unified repository deployment serving both a **Vite single-page application** and a **FastAPI backend** through unified edge rewrites.
+- 🩺 **Dynamic Health & Status Telemetry:** Integrated health check protocol (`/health` and `/api/health`) that tests backend readiness, database latency, and service connectivity.
+- 📑 **Audit-Ready Source Citations:** Every generated response includes exact document references, page numbers, and similarity confidence scores.
 
 ---
 
-## 🧩 Project Structure
+## 🏗️ System Architecture
 
-* **backend/** – Backend (FastAPI), RAG retrieval, and notebooks
-* **frontend/** – Vite web interface for Vercel deployment
-* **hr_policies/** – Folder for HR policy PDF documents
-* **README.md** – Project instructions
+```mermaid
+flowchart TD
+    User([👤 User / Employee]) -->|HTTPS Request| CDN[🌐 Vercel Edge Network]
+    
+    subgraph Vercel Services
+        CDN -->|Route: /| Frontend[💻 Frontend - Vite + Modern JS/CSS]
+        CDN -->|Route: /api/*, /health, /docs| Backend[⚡ Backend - FastAPI Service]
+    end
+
+    subgraph RAG Intelligence Pipeline
+        Backend -->|1. Generate Query Embeddings| Embedder[🔤 all-MiniLM-L6-v2 / Hugging Face]
+        Embedder -->|2. Cosine Vector Search| VectorDB[(🌲 Pinecone Serverless Vector Store)]
+        VectorDB -->|3. Matched HR Policy Chunks| ContextBuilder[📑 Context Formatter & Citation Builder]
+        ContextBuilder -->|4. Augmented Prompt| LLMEngine{🧠 Inference Switcher}
+        
+        LLMEngine -->|Primary / Local GPU| Ollama[🦙 Ollama LLaMA 3.1]
+        LLMEngine -->|Fallback / Cloud| Groq[⚡ Groq LPU Cloud Engine]
+    end
+
+    LLMEngine -->|5. Verified Answer + Citations| Backend
+    Backend -->|6. JSON Response| Frontend
+    Frontend -->|7. Formatted Answer Display| User
+```
 
 ---
 
-## 🚀 Deploying on Vercel (Frontend & Backend Services)
+## 📁 Repository Structure
 
-This repository includes a multi-service setup configured via `vercel.json` for full-stack deployment on Vercel:
+```text
+HR-Policies-RAG-Chatbot-AI-Powered-Document-Q-A/
+├── Backend/                            # FastAPI Backend Service
+│   ├── app/
+│   │   ├── ai/
+│   │   │   ├── llm.py                  # Dual LLM engine (Ollama + Groq)
+│   │   │   ├── rag.py                  # Pinecone retrieval & prompt synthesis
+│   │   │   └── vector_store.py         # Vector index connection & embeddings
+│   │   ├── core/
+│   │   │   └── config.py               # Pydantic v2 settings & environment loader
+│   │   ├── api/
+│   │   │   └── endpoints.py            # API routes (/ask, /health, /status)
+│   │   └── main.py                     # Inner FastAPI application
+│   ├── main.py                         # Root Vercel FastAPI entrypoint
+│   ├── pyproject.toml                  # Python package configuration
+│   └── requirements.txt                # Production backend dependencies
+│
+├── Frontend/                           # Modern Chat Interface (Vite)
+│   ├── src/
+│   │   ├── main.js                     # Health check, streaming chat, and state
+│   │   └── style.css                   # Glassmorphic responsive dark theme
+│   ├── index.html                      # Single page application markup
+│   ├── package.json                    # Frontend dependencies & Vite scripts
+│   └── vite.config.js                  # Vite configuration & dev proxy
+│
+├── HR Policies/                        # Authentic HR policy documents (PDFs)
+│   ├── HRMD-Procedures.pdf
+│   ├── Human Resources policy and manual.pdf
+│   └── USS HRD Policy Revised 2016.pdf
+│
+├── vercel.json                         # Vercel Multi-Service configuration
+├── pyproject.toml                      # Workspace Python definitions
+└── README.md                           # Project documentation
+```
 
-- **Frontend:** Modern interactive chat UI built with Vite (`frontend/`)
-- **Backend:** Serverless FastAPI service connecting to Pinecone (`backend/`)
-- **Routing:** Handled automatically via `vercel.json` rewrites
+---
 
-### Vercel Environment Variables:
-Configure the following in your **Vercel Project Settings > Environment Variables**:
+## 🚀 Live Endpoints
 
-| Variable | Description | Required? |
+| Endpoint | Method | Description |
 |---|---|---|
-| `PINECONE_API_KEY` | Your Pinecone API key | Yes |
-| `PINECONE_INDEX` | Index name (defaults to `hr-policies`) | Optional |
-| `PINECONE_NAMESPACE` | Namespace (defaults to `hr-policies`) | Optional |
-| `GROQ_API_KEY` | Free ultra-fast LLaMA 3.1 inference on cloud | Recommended |
-| `OPENAI_API_KEY` | OpenAI API key for GPT-4o-mini | Optional |
-| `HUGGINGFACE_API_KEY` | Hugging Face token for serverless embeddings | Optional |
-
-### Deploy via Vercel CLI:
-```bash
-# 1. Install Vercel CLI if not already installed
-npm install -g vercel
-
-# 2. Deploy to Vercel
-vercel
-```
+| `https://hr-policies-rag-chatbot-ai-powered.vercel.app/` | `GET` | Main Web Application UI |
+| `https://hr-policies-rag-chatbot-ai-powered.vercel.app/health` | `GET` | Health Check (`{"status": "online", "service": "HR Policies RAG API"}`) |
+| `https://hr-policies-rag-chatbot-ai-powered.vercel.app/docs` | `GET` | Interactive Swagger API Documentation |
+| `https://hr-policies-rag-chatbot-ai-powered.vercel.app/api/ask` | `POST` | RAG Query Endpoint (accepts query, top_k, threshold) |
+| `https://hr-policies-rag-chatbot-ai-powered.vercel.app/version` | `GET` | Current deployed service version and environment metadata |
 
 ---
 
-## ⚡ Notes
+## 🛠️ Local Development Setup
 
-* Ensure your Pinecone API key is set correctly.
-* Preprocessing PDFs is required on the first run to populate the vector store.
-* For local runs, Ollama Llama2 can be used; for Vercel cloud deployment, Groq or OpenAI is recommended because Vercel Serverless runs in a stateless environment without a local Ollama daemon.
+### 1. Prerequisites
+- **Python 3.11+** installed
+- **Node.js 18+** & npm installed
+- *(Optional)* [Ollama](https://ollama.ai/) with `ollama pull llama3.1`
 
-## 🎥 Demo Image
-<img width="2558" height="1598" alt="image" src="https://github.com/user-attachments/assets/d9579520-4b18-44be-9717-e472df7732ed" />
+### 2. Clone the Repository
+```bash
+git clone https://github.com/Shah-Abdul-Mazid/HR-Policies-RAG-Chatbot-AI-Powered-Document-Q-A.git
+cd HR-Policies-RAG-Chatbot-AI-Powered-Document-Q-A
+```
 
+### 3. Backend Setup
+```bash
+cd Backend
+python -m venv .venv
+# Windows:
+.venv\Scripts\activate
+# Linux/macOS:
+source .venv/bin/activate
+
+pip install -r requirements.txt
+```
+
+Create a `.env` file inside `Backend/`:
+```env
+PINECONE_API_KEY=your_pinecone_api_key_here
+PINECONE_ENVIRONMENT=us-east-1
+PINECONE_INDEX=hr-policies
+PINECONE_NAMESPACE=hr-policies
+GROQ_API_KEY=your_groq_api_key_here
+OLLAMA_BASE_URL=http://127.0.0.1:11434
+OLLAMA_MODEL=llama3.1:latest
+```
+
+Start the FastAPI development server:
+```bash
+uvicorn main:app --reload --port 8000
+```
+API Documentation will be live at `http://localhost:8000/docs`.
+
+### 4. Frontend Setup
+In a new terminal:
+```bash
+cd Frontend
+npm install
+npm run dev
+```
+Open `http://localhost:3000` or `http://localhost:5173` to interact with the assistant.
+
+---
+
+## 🌐 Production Deployment on Vercel
+
+This repository is pre-configured with a modern **Vercel Multi-Service architecture** (`vercel.json`):
+
+```json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "backend": {
+      "root": "Backend",
+      "framework": "fastapi",
+      "entrypoint": "main:app",
+      "installCommand": "pip install -r requirements.txt"
+    },
+    "frontend": {
+      "root": "Frontend",
+      "framework": "vite"
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": { "service": "backend" } },
+    { "source": "/api", "destination": { "service": "backend" } },
+    { "source": "/docs(.*)", "destination": { "service": "backend" } },
+    { "source": "/redoc(.*)", "destination": { "service": "backend" } },
+    { "source": "/openapi.json(.*)", "destination": { "service": "backend" } },
+    { "source": "/health", "destination": { "service": "backend" } },
+    { "source": "/version", "destination": { "service": "backend" } },
+    { "source": "/(.*)", "destination": { "service": "frontend" } }
+  ]
+}
+```
+
+### Required Vercel Environment Variables:
+Navigate to **Vercel Dashboard > Project Settings > Environment Variables** and add:
+
+| Variable | Description | Default / Example |
+|---|---|---|
+| `PINECONE_API_KEY` | Pinecone vector store API key | `pcsk_...` |
+| `PINECONE_INDEX` | Target Pinecone vector index | `hr-policies` |
+| `PINECONE_NAMESPACE` | Vector index namespace | `hr-policies` |
+| `GROQ_API_KEY` | High-speed cloud LLM inference key | `gsk_...` |
+| `GROQ_MODEL` | Default cloud model | `llama-3.1-8b-instant` |
+
+---
+
+## 👨‍💻 Author & Case Study
+
+**Shah Abdul Mazid**  
+*Full-Stack AI & Machine Learning Engineer*
+
+- 🌐 **Portfolio & Case Studies:** [shahabdulmazidezan.me](https://www.shahabdulmazidezan.me/)
+- 💻 **GitHub:** [@Shah-Abdul-Mazid](https://github.com/Shah-Abdul-Mazid)
+- 🚀 **Live Project:** [hr-policies-rag-chatbot-ai-powered.vercel.app](https://hr-policies-rag-chatbot-ai-powered.vercel.app/)
+
+---
+
+## 📄 License
+
+This project is open-source under the [MIT License](LICENSE).
